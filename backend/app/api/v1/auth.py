@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session as DBSession
+from sqlalchemy import select
 
 from app.core.security import (
     hash_password,
@@ -7,34 +9,34 @@ from app.core.security import (
     create_refresh_token,
     decode_token,
 )
+from app.db.session import get_db
+from app.db.models import User
 from app.schemas.auth import UserRegister, UserLogin, TokenPair, RefreshRequest, UserOut
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
-# Temporary in-memory store — replaced by real persistence in Phase 3
-_fake_users_db: dict[str, dict] = {}
-
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register(payload: UserRegister):
-    if payload.email in _fake_users_db:
+def register(payload: UserRegister, db: DBSession = Depends(get_db)):
+    existing = db.scalar(select(User).where(User.email == payload.email))
+    if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    _fake_users_db[payload.email] = {
-        "email": payload.email,
-        "password_hash": hash_password(payload.password),
-        "role": "user",
-    }
-    return UserOut(email=payload.email)
+
+    user = User(email=payload.email, password_hash=hash_password(payload.password))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return UserOut(email=user.email, role=user.role)
 
 
 @router.post("/login", response_model=TokenPair)
-def login(payload: UserLogin):
-    user = _fake_users_db.get(payload.email)
-    if not user or not verify_password(payload.password, user["password_hash"]):
+def login(payload: UserLogin, db: DBSession = Depends(get_db)):
+    user = db.scalar(select(User).where(User.email == payload.email))
+    if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return TokenPair(
-        access_token=create_access_token(payload.email),
-        refresh_token=create_refresh_token(payload.email),
+        access_token=create_access_token(user.email),
+        refresh_token=create_refresh_token(user.email),
     )
 
 

@@ -6,7 +6,8 @@ class Settings(BaseSettings):
 
     APP_NAME: str = "DeepFER Backend"
     ENV: str = "development"
-
+    
+    DATABASE_URL: str = "postgresql+psycopg2://deepfer:deepfer_dev_password@localhost:5432/deepfer"
     JWT_SECRET_KEY: str = "change-me-in-env"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
