@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# ML artifacts (large files stay out of git)
+ml/data/raw/*
+!ml/data/raw/.gitkeep
+ml/data/processed/*
+!ml/data/processed/.gitkeep
+*.h5
+*.keras
+*.ckpt
+saved_model/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docker
+*.log
