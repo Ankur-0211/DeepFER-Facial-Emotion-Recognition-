@@ -1,0 +1,4 @@
+{
+  "test_accuracy": 0.6195319030370576,
+  "artifact_path": "inference/artifacts/best_model.keras"
+}

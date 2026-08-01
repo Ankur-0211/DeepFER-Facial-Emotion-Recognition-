@@ -1,14 +1,32 @@
 version: "3.9"
 services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: deepfer
+      POSTGRES_PASSWORD: deepfer_dev_password
+      POSTGRES_DB: deepfer
+    ports:
+      - "5433:5432"
+    volumes:
+      - deepfer_pg_data:/var/lib/postgresql/data
+
   backend:
     build:
       context: .
       dockerfile: docker/backend.Dockerfile
     ports:
       - "8000:8000"
+    depends_on:
+      - db
+
   frontend:
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
       - "5173:5173"
+
+volumes:
+  deepfer_pg_data:
