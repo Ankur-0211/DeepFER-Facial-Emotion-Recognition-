@@ -5,6 +5,11 @@ from fastapi import FastAPI
 
 from app.core.config import settings
 from app.api.v1.auth import router as auth_router
+from app.api.v1.predict import router as predict_router
+from app.api.v1.ws_stream import router as ws_router
+from app.api.v1.reports import router as reports_router
+from app.services.inference_client import preload_model
+from fastapi.middleware.cors import CORSMiddleware
 
 # Structured-ish logging (JSON logs land in Phase 8's observability work;
 # this establishes the pattern early)
@@ -17,7 +22,18 @@ logger = logging.getLogger("deepfer")
 
 app = FastAPI(title=settings.APP_NAME)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router)
+app.include_router(predict_router)
+app.include_router(ws_router)
+app.include_router(reports_router)
 
 
 @app.get("/health")
@@ -28,3 +44,6 @@ def health():
 @app.on_event("startup")
 def on_startup():
     logger.info("DeepFER backend starting up in %s mode", settings.ENV)
+    logger.info("Preloading emotion recognition model...")
+    preload_model()
+    logger.info("Model preloaded and ready.")

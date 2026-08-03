@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type { User, AuthTokens } from "../types";
 import * as api from "../services/apiClient";
+import { setAccessToken } from "../services/tokenStore";
 
 interface AuthContextValue {
   user: User | null;
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const t = await api.login(email, password);
     setTokens(t);
+    setAccessToken(t.access_token);
     setUser({ email, role: "user" });
   }
 
@@ -30,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function logout() {
     setUser(null);
     setTokens(null);
+    setAccessToken(null);
   }
 
   return (

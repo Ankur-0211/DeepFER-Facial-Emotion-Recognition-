@@ -15,8 +15,15 @@ export default function Login() {
     try {
       await login(email, password);
       navigate("/dashboard");
-    } catch {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        setError("Invalid email or password");
+      } else if (err?.message === "Network Error") {
+        setError("Can't reach the server — is the backend running?");
+      } else {
+        setError("Something went wrong logging in. Check the console for details.");
+      }
+      console.error("login failed:", err);
     }
   }
 

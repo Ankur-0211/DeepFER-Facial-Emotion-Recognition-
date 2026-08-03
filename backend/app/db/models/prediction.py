@@ -12,6 +12,9 @@ class Prediction(Base):
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
+    model_version_id: Mapped[int | None] = mapped_column(
+        ForeignKey("model_versions.id", ondelete="SET NULL"), nullable=True
+    )
     source_type: Mapped[str] = mapped_column(String(20))  # "image" | "video" | "stream"
     emotion_label: Mapped[str] = mapped_column(String(20))
     confidence: Mapped[float] = mapped_column(Float)

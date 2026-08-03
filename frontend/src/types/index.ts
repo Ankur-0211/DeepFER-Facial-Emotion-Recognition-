@@ -19,6 +19,16 @@ export interface PredictionResponse {
   timestamp: string;
 }
 
+export interface TimelineEntry {
+  timestamp_sec: number;
+  emotion: string;
+  confidence: number;
+}
+
+export interface VideoPredictionResponse {
+  timeline: TimelineEntry[];
+}
+
 export interface User {
   email: string;
   role: "user" | "admin";

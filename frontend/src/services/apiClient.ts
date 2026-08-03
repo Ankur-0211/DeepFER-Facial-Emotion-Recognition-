@@ -1,36 +1,56 @@
-import type { PredictionResponse, AuthTokens, User } from "../types";
+import axios from "axios";
+import type { PredictionResponse, AuthTokens, User, VideoPredictionResponse } from "../types";
+import { getAccessToken } from "./tokenStore";
 
-// NOTE: This is a mock client for Phase 4 UI development.
-// Phase 6 replaces the bodies of these functions with real axios calls
-// against the FastAPI backend from Phases 2-3.
 
-const MOCK_DELAY = 500;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-function delay<T>(value: T): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), MOCK_DELAY));
+const client = axios.create({ baseURL: API_BASE_URL });
+
+client.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export async function login(email: string, password: string): Promise<AuthTokens> {
+  const { data } = await client.post<AuthTokens>("/api/v1/auth/login", { email, password });
+  return data;
 }
 
-export async function login(email: string, _password: string): Promise<AuthTokens> {
-  return delay({
-    access_token: "mock-access-token",
-    refresh_token: "mock-refresh-token",
-    token_type: "bearer",
-  });
+export async function register(email: string, password: string): Promise<User> {
+  const { data } = await client.post<User>("/api/v1/auth/register", { email, password });
+  return data;
 }
 
-export async function register(email: string, _password: string): Promise<User> {
-  return delay({ email, role: "user" });
+export async function predictImage(file: File): Promise<PredictionResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await client.post<{ predictions: PredictionResponse["predictions"] }>(
+    "/api/v1/predict/image",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return { predictions: data.predictions, timestamp: new Date().toISOString() };
 }
 
-export async function predictImage(_file: File): Promise<PredictionResponse> {
-  return delay({
-    predictions: [
-      {
-        emotion: "happy",
-        confidence: 0.92,
-        boundingBox: { x: 50, y: 40, width: 120, height: 120 },
-      },
-    ],
-    timestamp: new Date().toISOString(),
-  });
+export async function predictVideo(file: File): Promise<VideoPredictionResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await client.post<VideoPredictionResponse>(
+    "/api/v1/predict/video",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}
+
+export async function fetchReportsSummary(): Promise<{ emotion: string; count: number }[]> {
+  const { data } = await client.get<{ distribution: { emotion: string; count: number }[] }>(
+    "/api/v1/reports/summary"
+  );
+  return data.distribution;
 }

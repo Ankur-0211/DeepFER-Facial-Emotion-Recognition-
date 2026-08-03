@@ -5,13 +5,26 @@ import { useAuth } from "../hooks/useAuth";
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    await register(email, password);
-    navigate("/login");
+    setError(null);
+    try {
+      await register(email, password);
+      navigate("/login");
+    } catch (err: any) {
+      if (err?.response?.status === 400) {
+        setError("That email is already registered.");
+      } else if (err?.message === "Network Error") {
+        setError("Can't reach the server — is the backend running?");
+      } else {
+        setError("Something went wrong registering. Check the console for details.");
+      }
+      console.error("register failed:", err);
+    }
   }
 
   return (
@@ -35,6 +48,7 @@ export default function Register() {
             type="password"
             required
           />
+          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
           <button
             onClick={handleSubmit}
             className="w-full bg-slate-800 text-white rounded-lg py-2 font-medium"
