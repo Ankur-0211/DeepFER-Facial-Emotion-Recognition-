@@ -3,6 +3,8 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "../hooks/useAuth";
 import Login from "../pages/Login";
 
+jest.mock("../services/apiClient");
+
 test("renders login form fields", () => {
   render(
     <BrowserRouter>

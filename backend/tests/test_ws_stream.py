@@ -25,7 +25,7 @@ FAKE_FACES = [
     {
         "label": "surprise",
         "confidence": 0.77,
-        "bounding_box": [5, 5, 30, 30],
+        "bounding_box": {"x": 5, "y": 5, "width": 30, "height": 30},
         "class_probabilities": {"surprise": 0.77, "fear": 0.23},
     }
 ]

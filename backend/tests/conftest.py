@@ -7,7 +7,11 @@ from app.db.session import Base, get_db
 from app.db import models  # noqa: F401
 from app.main import app
 
-engine = create_engine(settings.DATABASE_URL)
+# Tests must NEVER run against the real dev database — this uses a
+# dedicated test database so setup/teardown can't wipe real data.
+TEST_DATABASE_URL = settings.DATABASE_URL.rsplit("/", 1)[0] + "/deepfer_test"
+
+engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

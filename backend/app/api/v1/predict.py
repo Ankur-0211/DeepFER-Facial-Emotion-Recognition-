@@ -63,12 +63,7 @@ async def predict_image(
             FacePrediction(
                 emotion=f["label"],
                 confidence=f["confidence"],
-                boundingBox=BoundingBoxSchema(
-                    x=f["bounding_box"][0],
-                    y=f["bounding_box"][1],
-                    width=f["bounding_box"][2],
-                    height=f["bounding_box"][3],
-                ),
+                boundingBox=BoundingBoxSchema(**f["bounding_box"]),
             )
             for f in faces
         ]

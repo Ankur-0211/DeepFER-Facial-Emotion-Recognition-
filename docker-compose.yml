@@ -11,6 +11,11 @@ services:
       - "5433:5432"
     volumes:
       - deepfer_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deepfer"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -18,15 +23,23 @@ services:
       dockerfile: docker/backend.Dockerfile
     ports:
       - "8000:8000"
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://deepfer:deepfer_dev_password@db:5432/deepfer"
+      JWT_SECRET_KEY: "local-dev-secret-change-for-real-deploy"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile
+      args:
+        VITE_API_BASE_URL: "http://localhost:8000"
     ports:
-      - "5173:5173"
+      - "5173:80"
+    depends_on:
+      - backend
 
 volumes:
   deepfer_pg_data:

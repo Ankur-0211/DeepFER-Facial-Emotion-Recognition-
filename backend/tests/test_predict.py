@@ -28,17 +28,16 @@ FAKE_FACES = [
     {
         "label": "happy",
         "confidence": 0.91,
-        "bounding_box": [10, 10, 40, 40],
+        "bounding_box": {"x": 10, "y": 10, "width": 40, "height": 40},
         "class_probabilities": {"happy": 0.91, "sad": 0.02, "neutral": 0.07},
     },
     {
         "label": "neutral",
         "confidence": 0.55,
-        "bounding_box": [60, 60, 90, 90],
+        "bounding_box": {"x": 60, "y": 60, "width": 90, "height": 90},
         "class_probabilities": {"happy": 0.1, "sad": 0.05, "neutral": 0.55, "angry": 0.3},
     },
 ]
-
 
 async def _fake_predict_faces_async(image):
     return FAKE_FACES
